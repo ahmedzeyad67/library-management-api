@@ -1,31 +1,22 @@
 import User from "../models/user-model.js";
 import AppError from "../utils/app-error.js";
 import paginate from "../utils/pagination.js";
+import nameSearchQuery from "../utils/name-search-query.js";
 
 const getAllUsers = async (queryParams) => {
   const { page, limit, sort, order, search, ...query } = queryParams;
 
   if (search) {
-    const searchParts = search.trim().split(/\s+/);
-
     const searchQueries = [
       { email: { $regex: search, $options: "i" } },
       { phone: { $regex: search, $options: "i" } },
     ];
 
-    if (searchParts.length > 1) {
-      searchQueries.push({
-        $and: [
-          { firstName: { $regex: searchParts[0], $options: "i" } },
-          { lastName: { $regex: searchParts[1], $options: "i" } },
-        ],
-      });
-    } else {
-      searchQueries.push(
-        { firstName: { $regex: search, $options: "i" } },
-        { lastName: { $regex: search, $options: "i" } },
-      );
+    const nameQuery = nameSearchQuery(search);
+    if (nameQuery) {
+      searchQueries.push(nameQuery);
     }
+
     query.$or = searchQueries;
   }
 

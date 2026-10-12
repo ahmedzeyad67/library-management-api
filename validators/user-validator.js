@@ -1,23 +1,13 @@
 import { body, query } from "express-validator";
+import paginationValidator from "./pagination-validator.js";
 
 const getAllUsers = [
-  query("page")
+  ...paginationValidator(["firstName", "lastName", "email", "createdAt"]),
+  query("search")
     .optional()
-    .isInt({ min: 1 })
-    .withMessage("Page must be a positive integer"),
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be a positive integer between 1 and 100"),
-  query("sort")
-    .optional()
-    .isIn(["firstName", "lastName", "email", "createdAt"])
-    .withMessage("Invalid sort field"),
-  query("order")
-    .optional()
-    .isIn(["asc", "desc"])
-    .withMessage("Order must be either asc or desc"),
-  query("search").optional().trim(),
+    .trim()
+    .notEmpty()
+    .withMessage("Search term cannot be empty"),
   query("role")
     .optional()
     .isIn(["user", "admin"])

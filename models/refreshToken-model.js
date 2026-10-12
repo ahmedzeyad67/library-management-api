@@ -3,7 +3,7 @@ import hashToken from "../utils/hash-token.js";
 
 const refreshTokenSchema = new Schema(
   {
-    user: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,

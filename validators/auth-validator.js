@@ -35,9 +35,9 @@ const registerUser = [
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters long"),
   body("role")
-    .optional()
-    .isIn(["user", "admin"])
-    .withMessage("Role must be either 'user' or 'admin'"),
+    .not()
+    .exists()
+    .withMessage("Role cannot be provided during registration"),
 ];
 
 const loginUser = [

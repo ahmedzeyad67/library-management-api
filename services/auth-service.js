@@ -20,7 +20,7 @@ const assignTokens = async (user) => {
   );
 
   await RefreshToken.create({
-    user: user._id,
+    userId: user._id,
     token: refreshToken,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   });
@@ -29,7 +29,7 @@ const assignTokens = async (user) => {
 };
 
 const registerUser = async (userData) => {
-  const newUser = new User(userData);
+  const newUser = new User({ ...userData, role: "user" });
 
   await newUser.save();
 
@@ -59,7 +59,7 @@ const refreshUserTokens = async (refreshToken) => {
   const decoded = verifyRefreshToken(refreshToken);
 
   const storedToken = await RefreshToken.findOneAndDelete({
-    user: decoded.id,
+    userId: decoded.id,
     token: hashToken(refreshToken),
   });
 
@@ -97,7 +97,7 @@ const changePassword = async (userId, currentPassword, newPassword) => {
   user.password = newPassword;
   await user.save();
 
-  await RefreshToken.deleteMany({ user: userId });
+  await RefreshToken.deleteMany({ userId });
 };
 
 export default {

@@ -6,7 +6,7 @@ const getAllUsers = asyncWrapper(async (req, res) => {
 
   res.json({
     status: "success",
-    data,
+    ...data,
   });
 });
 
@@ -19,13 +19,13 @@ const updateMe = asyncWrapper(async (req, res) => {
 const activateUser = asyncWrapper(async (req, res) => {
   const user = await userService.activateUser(req.params.userId);
 
-  res.json({ status: "success", data: { user } });
+  res.json({ status: "success", data: user });
 });
 
 const deactivateUser = asyncWrapper(async (req, res) => {
   const user = await userService.deactivateUser(req.params.userId);
 
-  res.json({ status: "success", data: { user } });
+  res.json({ status: "success", data: user });
 });
 
 export default {

@@ -38,14 +38,14 @@ router
   );
 
 router.patch(
-  "/activate/:bookId",
+  "/:bookId/activate",
   authenticate,
   authorize("admin"),
   booksController.activateBook,
 );
 
 router.patch(
-  "/deactivate/:bookId",
+  "/:bookId/deactivate",
   authenticate,
   authorize("admin"),
   booksController.deactivateBook,

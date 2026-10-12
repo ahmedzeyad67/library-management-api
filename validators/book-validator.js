@@ -1,4 +1,5 @@
 import { body, query } from "express-validator";
+import paginationValidator from "./pagination-validator.js";
 
 function isValidISBN(value) {
   const isbn = value.replace(/[-\s]/g, "");
@@ -30,27 +31,8 @@ function isValidISBN(value) {
   return false;
 }
 
-const getBooksQuery = [
-  query("page")
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage("Page must be a positive integer"),
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be a positive integer between 1 and 100"),
-  query("sort")
-    .optional()
-    .isIn(["title", "author", "publishedYear", "createdAt"])
-    .withMessage("Invalid sort field"),
-  query("order")
-    .optional()
-    .isIn(["asc", "desc"])
-    .withMessage("Order must be either asc or desc"),
-];
-
 const getActiveBooks = [
-  ...getBooksQuery,
+  ...paginationValidator(["title", "author", "publishedYear", "createdAt"]),
   query("isActive")
     .not()
     .exists()
@@ -58,7 +40,7 @@ const getActiveBooks = [
 ];
 
 const getAllBooks = [
-  ...getBooksQuery,
+  ...paginationValidator(["title", "author", "publishedYear", "createdAt"]),
   query("isActive")
     .optional()
     .isBoolean()

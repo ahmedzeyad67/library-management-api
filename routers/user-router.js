@@ -24,14 +24,14 @@ router.patch(
 );
 
 router.patch(
-  "/activate/:userId",
+  "/:userId/activate",
   authenticate,
   authorize("admin"),
   usersController.activateUser,
 );
 
 router.patch(
-  "/deactivate/:userId",
+  "/:userId/deactivate",
   authenticate,
   authorize("admin"),
   usersController.deactivateUser,

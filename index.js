@@ -5,6 +5,8 @@ import { connect } from "mongoose";
 import authRouter from "./routers/auth-router.js";
 import booksRouter from "./routers/book-router.js";
 import usersRouter from "./routers/user-router.js";
+import reservationsRouter from "./routers/reservation-router.js";
+import loansRouter from "./routers/loan-router.js";
 import errorHandler from "./middlewares/error-handler.js";
 
 const app = express();
@@ -32,6 +34,8 @@ startServer();
 app.use("/api/auth", authRouter);
 app.use("/api/books", booksRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/reservations", reservationsRouter);
+app.use("/api/loans", loansRouter);
 
 app.use((req, res) => {
   res.status(404).json({ status: "error", message: "Route not found" });

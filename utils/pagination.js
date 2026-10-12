@@ -7,8 +7,14 @@ const paginate = async (model, query = {}, options = {}) => {
     ? { [options.sort]: options.order === "desc" ? -1 : 1 }
     : {};
 
+  let dataQuery = model.find(query).sort(sort).skip(skip).limit(limit);
+
+  if (options.populate) {
+    dataQuery = dataQuery.populate(options.populate);
+  }
+
   const [data, total] = await Promise.all([
-    model.find(query).sort(sort).skip(skip).limit(limit),
+    dataQuery,
     model.countDocuments(query),
   ]);
 
