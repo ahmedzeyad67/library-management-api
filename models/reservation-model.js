@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const ReservationSchema = new Schema(
+const reservationSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -28,4 +28,22 @@ const ReservationSchema = new Schema(
   { timestamps: true },
 );
 
-export default model("Reservation", ReservationSchema);
+reservationSchema.index(
+  { userId: 1, bookId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      status: { $in: ["pending", "approved"] },
+    },
+    name: "unique_active_reservation",
+  },
+);
+
+reservationSchema.index(
+  { bookId: 1, status: 1, reservedAt: 1 },
+  {
+    name: "book_pending_queue",
+  },
+);
+
+export default model("Reservation", reservationSchema);

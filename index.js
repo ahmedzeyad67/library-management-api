@@ -8,6 +8,7 @@ import usersRouter from "./routers/user-router.js";
 import reservationsRouter from "./routers/reservation-router.js";
 import loansRouter from "./routers/loan-router.js";
 import errorHandler from "./middlewares/error-handler.js";
+import startScheduledJobs from "./jobs/scheduled-jobs.js";
 
 const app = express();
 app.use(express.json());
@@ -24,6 +25,8 @@ async function startServer() {
     app.listen(port, () => {
       console.log("Server is running on port", port);
     });
+
+    startScheduledJobs();
   } catch (error) {
     console.error("Failed to start server:", error);
   }

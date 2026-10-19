@@ -1,12 +1,15 @@
+import mongoose from "mongoose";
 import { DateTime } from "luxon";
 import User from "../models/user-model.js";
 import Book from "../models/book-model.js";
 import Loan from "../models/loan-model.js";
 import AppError from "../utils/app-error.js";
 import paginate from "../utils/pagination.js";
-import promoteNextReservation from "../utils/reservation-helper.js";
+import promoteNextReservation from "../utils/promote-next-reservation.js";
 import nameSearchQuery from "../utils/name-search-query.js";
 import renamePopulatedFields from "../utils/rename-populated-fields.js";
+import calculateFine from "../utils/calculate-fine.js";
+import escapeRegex from "../utils/escape-regex.js";
 
 const getDayRange = (date) => {
   const startDate = DateTime.fromISO(date, {
@@ -48,7 +51,7 @@ const getLoans = async (queryParams, user) => {
 
   if (bookSearch) {
     const books = await Book.find({
-      title: { $regex: bookSearch, $options: "i" },
+      title: { $regex: escapeRegex(bookSearch), $options: "i" },
     }).select("_id");
 
     query.bookId = { $in: books.map((book) => book._id) };
@@ -99,30 +102,45 @@ const getLoanById = async (loanId, user) => {
 };
 
 const returnLoan = async (loanId) => {
-  const loan = await Loan.findById(loanId);
+  const session = await mongoose.startSession();
 
-  if (!loan) {
-    throw new AppError("Loan not found", 404);
+  try {
+    let returnedLoan;
+
+    await session.withTransaction(async () => {
+      const loan = await Loan.findById(loanId).session(session);
+
+      if (!loan) {
+        throw new AppError("Loan not found", 404);
+      }
+
+      if (loan.status === "returned") {
+        throw new AppError("Loan has already been returned", 400);
+      }
+
+      const book = await Book.findById(loan.bookId).session(session);
+
+      if (!book) {
+        throw new AppError("Book not found for this loan", 404);
+      }
+
+      loan.status = "returned";
+      loan.returnedAt = new Date();
+      loan.fine = calculateFine(loan.dueDate);
+      await loan.save({ session });
+
+      book.availableCopies += 1;
+      await book.save({ session });
+
+      await promoteNextReservation(book, session);
+
+      returnedLoan = loan;
+    });
+
+    return returnedLoan;
+  } finally {
+    await session.endSession();
   }
-
-  if (loan.status === "returned") {
-    throw new AppError("Loan has already been returned", 400);
-  }
-
-  loan.status = "returned";
-  loan.returnedAt = new Date();
-  await loan.save();
-
-  const book = await Book.findById(loan.bookId);
-
-  if (book) {
-    book.availableCopies += 1;
-    await book.save();
-
-    await promoteNextReservation(book);
-  }
-
-  return loan;
 };
 
 export default {

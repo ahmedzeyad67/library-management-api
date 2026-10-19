@@ -3,6 +3,8 @@ import booksController from "../controllers/book-controller.js";
 import booksValidator from "../validators/book-validator.js";
 import validate from "../middlewares/validate.js";
 import { authenticate, authorize } from "../middlewares/auth.js";
+import uploadImage from "../middlewares/upload-image.js";
+import validateImage from "../middlewares/validate-image.js";
 
 const router = Router();
 
@@ -12,6 +14,8 @@ router
   .post(
     authenticate,
     authorize("admin"),
+    uploadImage,
+    validateImage,
     booksValidator.createBook,
     validate,
     booksController.createBook,
@@ -32,6 +36,8 @@ router
   .patch(
     authenticate,
     authorize("admin"),
+    uploadImage,
+    validateImage,
     booksValidator.updateBook,
     validate,
     booksController.updateBook,

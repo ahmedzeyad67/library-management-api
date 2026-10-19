@@ -2,14 +2,15 @@ import User from "../models/user-model.js";
 import AppError from "../utils/app-error.js";
 import paginate from "../utils/pagination.js";
 import nameSearchQuery from "../utils/name-search-query.js";
+import escapeRegex from "../utils/escape-regex.js";
 
 const getAllUsers = async (queryParams) => {
   const { page, limit, sort, order, search, ...query } = queryParams;
 
   if (search) {
     const searchQueries = [
-      { email: { $regex: search, $options: "i" } },
-      { phone: { $regex: search, $options: "i" } },
+      { email: { $regex: escapeRegex(search), $options: "i" } },
+      { phone: { $regex: escapeRegex(search), $options: "i" } },
     ];
 
     const nameQuery = nameSearchQuery(search);
@@ -24,8 +25,16 @@ const getAllUsers = async (queryParams) => {
 };
 
 const updateMe = async (userId, userData) => {
-  const updatedUser = await User.findByIdAndUpdate(userId, userData, {
-    new: true,
+  const { firstName, lastName, email, phone } = userData;
+
+  const allowedUpdates = Object.fromEntries(
+    Object.entries({ firstName, lastName, email, phone }).filter(
+      ([, value]) => value !== undefined,
+    ),
+  );
+
+  const updatedUser = await User.findByIdAndUpdate(userId, allowedUpdates, {
+    returnDocument: "after",
     runValidators: true,
   });
 

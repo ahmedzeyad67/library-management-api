@@ -1,5 +1,10 @@
 import Book from "../models/book-model.js";
 import AppError from "../utils/app-error.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from "../utils/cloudinary-helper.js";
+import escapeRegex from "../utils/escape-regex.js";
 import paginate from "../utils/pagination.js";
 
 const getActiveBooks = async (queryParams) => {
@@ -7,8 +12,8 @@ const getActiveBooks = async (queryParams) => {
 
   if (search) {
     query.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { author: { $regex: search, $options: "i" } },
+      { title: { $regex: escapeRegex(search), $options: "i" } },
+      { author: { $regex: escapeRegex(search), $options: "i" } },
     ];
   }
 
@@ -24,8 +29,8 @@ const getAllBooks = async (queryParams) => {
 
   if (search) {
     query.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { author: { $regex: search, $options: "i" } },
+      { title: { $regex: escapeRegex(search), $options: "i" } },
+      { author: { $regex: escapeRegex(search), $options: "i" } },
     ];
   }
 
@@ -42,40 +47,122 @@ const getBookById = async (bookId) => {
   return book;
 };
 
-const createBook = async (bookData) => {
-  const newBook = new Book(...bookData, {
-    availableCopies: bookData.totalCopies,
-  });
-  await newBook.save();
+const createBook = async (bookData, coverImageFile) => {
+  let coverImage;
 
-  return newBook;
+  try {
+    if (coverImageFile) {
+      coverImage = await uploadToCloudinary(coverImageFile.buffer);
+    }
+
+    const newBook = new Book({
+      ...bookData,
+      ...(coverImage && { coverImage }),
+      availableCopies: bookData.totalCopies,
+    });
+    await newBook.save();
+
+    const bookResponse = newBook.toObject();
+
+    if (bookResponse.coverImage) {
+      delete bookResponse.coverImage.publicId;
+    }
+
+    return bookResponse;
+  } catch (error) {
+    if (coverImage?.publicId) {
+      try {
+        await deleteFromCloudinary(coverImage.publicId);
+      } catch (err) {
+        console.error("Failed to clean up uploaded cover image:", err);
+      }
+    }
+    throw error;
+  }
 };
 
-const updateBook = async (bookId, bookData) => {
-  const book = await Book.findById(bookId);
+const updateBook = async (bookId, bookData, coverImageFile) => {
+  const book = await Book.findById(bookId).select("+coverImage.publicId");
 
   if (!book) {
     throw new AppError("Book not found", 404);
   }
 
-  if (bookData.totalCopies !== undefined) {
+  const { totalCopies, availableCopies, ...otherData } = bookData;
+
+  if (totalCopies !== undefined) {
     const borrowedCopies = book.totalCopies - book.availableCopies;
 
-    if (bookData.totalCopies < borrowedCopies) {
+    if (totalCopies < borrowedCopies) {
       throw new AppError(
         `Total copies cannot be less than borrowed copies (${borrowedCopies})`,
         400,
       );
     }
 
-    book.totalCopies = bookData.totalCopies;
-    book.availableCopies = bookData.totalCopies - borrowedCopies;
+    otherData.totalCopies = totalCopies;
+    otherData.availableCopies = totalCopies - borrowedCopies;
   }
 
-  Object.assign(book, bookData);
-  await book.save();
+  let uploadedImage;
 
-  return book;
+  if (coverImageFile) {
+    uploadedImage = await uploadToCloudinary(coverImageFile.buffer);
+    otherData.coverImage = uploadedImage;
+  }
+
+  let updatedBook;
+
+  try {
+    const filter = {
+      _id: bookId,
+      totalCopies: book.totalCopies,
+      availableCopies: book.availableCopies,
+    };
+
+    if (uploadedImage) {
+      if (book.coverImage?.publicId) {
+        filter["coverImage.publicId"] = book.coverImage.publicId;
+      } else {
+        filter["coverImage.publicId"] = { $exists: false };
+      }
+    }
+
+    updatedBook = await Book.findOneAndUpdate(
+      filter,
+      { $set: otherData },
+      { returnDocument: "after", runValidators: true },
+    );
+
+    if (!updatedBook) {
+      throw new AppError("Update failed, Please try again", 409);
+    }
+  } catch (error) {
+    if (uploadedImage?.publicId) {
+      try {
+        await deleteFromCloudinary(uploadedImage.publicId);
+      } catch (err) {
+        console.error("Failed to clean up uploaded cover image:", err);
+      }
+    }
+    throw error;
+  }
+
+  if (uploadedImage && book.coverImage?.publicId) {
+    try {
+      await deleteFromCloudinary(book.coverImage.publicId);
+    } catch (err) {
+      console.error("Failed to delete old cover image:", err);
+    }
+  }
+
+  const bookResponse = updatedBook.toObject();
+
+  if (bookResponse.coverImage) {
+    delete bookResponse.coverImage.publicId;
+  }
+
+  return bookResponse;
 };
 
 const updateBookStatus = async (bookId, isActive) => {

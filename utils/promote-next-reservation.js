@@ -1,6 +1,6 @@
 import Reservation from "../models/reservation-model.js";
 
-const promoteNextReservation = async (book) => {
+const promoteNextReservation = async (book, session) => {
   if (book.availableCopies <= 0) {
     return;
   }
@@ -8,7 +8,9 @@ const promoteNextReservation = async (book) => {
   const nextReservation = await Reservation.findOne({
     bookId: book._id,
     status: "pending",
-  }).sort({ reservedAt: 1 });
+  })
+    .sort({ reservedAt: 1 })
+    .session(session);
 
   if (!nextReservation) {
     return;
@@ -23,7 +25,8 @@ const promoteNextReservation = async (book) => {
 
   book.availableCopies -= 1;
 
-  await Promise.all([nextReservation.save(), book.save()]);
+  await nextReservation.save({ session });
+  await book.save({ session });
 };
 
 export default promoteNextReservation;

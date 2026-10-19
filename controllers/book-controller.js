@@ -26,13 +26,17 @@ const getBookById = asyncWrapper(async (req, res) => {
 });
 
 const createBook = asyncWrapper(async (req, res) => {
-  const newBook = await bookService.createBook(req.body);
+  const newBook = await bookService.createBook(req.body, req.file);
 
   res.status(201).json({ status: "success", data: newBook });
 });
 
 const updateBook = asyncWrapper(async (req, res) => {
-  const updatedBook = await bookService.updateBook(req.params.bookId, req.body);
+  const updatedBook = await bookService.updateBook(
+    req.params.bookId,
+    req.body,
+    req.file,
+  );
 
   res.json({ status: "success", data: updatedBook });
 });

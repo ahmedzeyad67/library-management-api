@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import BOOK_CATEGORIES from "../constants/book-categories.js";
 
 const bookSchema = new Schema(
   {
@@ -36,8 +37,11 @@ const bookSchema = new Schema(
     category: {
       type: String,
       required: true,
-      maxlength: 25,
       trim: true,
+      enum: {
+        values: BOOK_CATEGORIES,
+        message: "{VALUE} is not a valid category",
+      },
     },
 
     publishedYear: {
@@ -62,7 +66,13 @@ const bookSchema = new Schema(
     },
 
     coverImage: {
-      type: String,
+      url: {
+        type: String,
+      },
+      publicId: {
+        type: String,
+        select: false,
+      },
     },
 
     isActive: {

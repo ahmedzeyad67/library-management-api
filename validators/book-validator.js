@@ -1,5 +1,6 @@
 import { body, query } from "express-validator";
 import paginationValidator from "./pagination-validator.js";
+import BOOK_CATEGORIES from "../constants/book-categories.js";
 
 function isValidISBN(value) {
   const isbn = value.replace(/[-\s]/g, "");
@@ -74,8 +75,8 @@ const createBook = [
     .trim()
     .notEmpty()
     .withMessage("Category is required")
-    .isLength({ min: 2, max: 25 })
-    .withMessage("Category must be between 2 and 25 characters long"),
+    .isIn(BOOK_CATEGORIES)
+    .withMessage("Invalid book category"),
   body("description")
     .trim()
     .notEmpty()
@@ -86,15 +87,17 @@ const createBook = [
     .notEmpty()
     .withMessage("Published year is required")
     .isInt({ min: 1000, max: new Date().getFullYear() })
-    .withMessage("Published year must be a valid year"),
+    .withMessage("Published year must be a valid year")
+    .toInt(),
   body("totalCopies")
     .isInt({ min: 1 })
-    .withMessage("Total copies must be at least 1"),
-  body("coverImage")
+    .withMessage("Total copies must be at least 1")
+    .toInt(),
+  body("isActive")
     .optional()
-    .trim()
-    .isURL()
-    .withMessage("Cover image must be a valid URL"),
+    .isBoolean()
+    .withMessage("isActive must be a boolean value")
+    .toBoolean(),
   body()
     .custom((value) => !Object.hasOwn(value, "availableCopies"))
     .withMessage("availableCopies field cannot be set manually"),
@@ -123,8 +126,8 @@ const updateBook = [
   body("category")
     .optional()
     .trim()
-    .isLength({ min: 2, max: 25 })
-    .withMessage("Category must be between 2 and 25 characters long"),
+    .isIn(BOOK_CATEGORIES)
+    .withMessage("Invalid book category"),
   body("description")
     .optional()
     .trim()
@@ -133,21 +136,21 @@ const updateBook = [
   body("publishedYear")
     .optional()
     .isInt({ min: 1000, max: new Date().getFullYear() })
-    .withMessage("Published year must be a valid year"),
+    .withMessage("Published year must be a valid year")
+    .toInt(),
   body("totalCopies")
     .optional()
     .isInt({ min: 1 })
-    .withMessage("Total copies must be at least 1"),
-  body("coverImage")
-    .optional()
-    .trim()
-    .isURL()
-    .withMessage("Cover image must be a valid URL"),
+    .withMessage("Total copies must be at least 1")
+    .toInt(),
   body()
     .custom((value) => !Object.hasOwn(value, "availableCopies"))
     .withMessage("availableCopies field cannot be set manually"),
   body()
-    .custom((value) => Object.keys(value).length > 0)
+    .custom((value) => !Object.hasOwn(value, "isActive"))
+    .withMessage("isActive field cannot be set manually"),
+  body()
+    .custom((value, { req }) => Object.keys(value).length > 0 || !!req.file)
     .withMessage("At least one field must be provided for update"),
 ];
 

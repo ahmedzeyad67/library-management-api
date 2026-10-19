@@ -41,4 +41,20 @@ const loanSchema = new Schema(
   { timestamps: true },
 );
 
+loanSchema.index(
+  { userId: 1, bookId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { status: { $in: ["borrowed", "overdue"] } },
+    name: "unique_active_loan",
+  },
+);
+
+loanSchema.index(
+  { status: 1, dueDate: 1 },
+  {
+    name: "loan_overdue_lookup",
+  },
+);
+
 export default model("Loan", loanSchema);

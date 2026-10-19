@@ -13,14 +13,18 @@
   "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.11.0",
     "cors": "^2.8.6",
     "dotenv": "^18.0.4",
     "express": "^5.2.1",
     "express-validator": "^7.3.2",
+    "file-type": "^22.2.0",
     "jsonwebtoken": "^9.0.3",
     "luxon": "^3.7.2",
     "mongodb": "^7.5.0",
     "mongoose": "^9.9.2",
+    "multer": "^2.4.0",
+    "node-cron": "^4.6.0",
     "validator": "^13.15.35"
   }
 }

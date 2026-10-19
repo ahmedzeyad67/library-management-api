@@ -44,6 +44,11 @@ const updateMe = [
     .isLength({ max: 20 })
     .withMessage("Phone number must be at most 20 characters long"),
   body()
+    .custom(
+      (value) =>
+        value !== null && typeof value === "object" && !Array.isArray(value),
+    )
+    .withMessage("Request body must be an object")
     .custom((value) => Object.keys(value).length > 0)
     .withMessage("At least one field must be provided")
     .custom((value) => {
