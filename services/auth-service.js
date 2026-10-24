@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { randomUUID } from "crypto";
 import User from "../models/user-model.js";
 import RefreshToken from "../models/refreshToken-model.js";
 import AppError from "../utils/app-error.js";
@@ -11,13 +12,13 @@ const assignTokens = async (user, session) => {
   const accessToken = jwt.sign(
     { id: user._id, role: user.role },
     process.env.JWT_ACCESS_SECRET_KEY,
-    { expiresIn: "15m" },
+    { expiresIn: "15m", jwtid: randomUUID() },
   );
 
   const refreshToken = jwt.sign(
     { id: user._id, role: user.role },
     process.env.JWT_REFRESH_SECRET_KEY,
-    { expiresIn: "7d" },
+    { expiresIn: "7d", jwtid: randomUUID() },
   );
 
   await RefreshToken.create(
