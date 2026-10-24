@@ -151,8 +151,8 @@ Protected endpoints require authentication, while administrative operations use 
 Clone the repository and install its dependencies:
 
 ```bash
-git clone https://github.com/ahmedzeyad67/library-management-system.git
-cd library-management-system
+git clone https://github.com/ahmedzeyad67/library-management-api.git
+cd library-management-api
 npm install
 ```
 
