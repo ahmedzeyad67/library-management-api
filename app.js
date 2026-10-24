@@ -23,6 +23,10 @@ app.use("/api/users", usersRouter);
 app.use("/api/reservations", reservationsRouter);
 app.use("/api/loans", loansRouter);
 
+app.get("/healthz", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.use((req, res) => {
   res.status(404).json({
     status: "error",

@@ -4,9 +4,9 @@ A RESTful library management API built with Node.js, Express, and MongoDB, featu
 
 ## 🔗 Links
 
-- **[Live API](https://your-api.onrender.com)** — Access the deployed API.
-- **[Interactive API Documentation](http://localhost:3000/reference)** — Explore and test endpoints.
-- **[OpenAPI Specification](http://localhost:3000/openapi.json)** — View the API specification.
+- **[Live API](https://library-management-api-w0r6.onrender.com)** — Access the deployed API.
+- **[Interactive API Documentation](https://library-management-api-w0r6.onrender.com/reference)** — Explore and test endpoints.
+- **[OpenAPI Specification](https://library-management-api-w0r6.onrender.com/openapi.json)** — View the API specification.
 
 ## ✨ Features
 
@@ -150,11 +150,11 @@ Protected endpoints require authentication, while administrative operations use 
 
 Clone the repository and install its dependencies:
 
-\`\`\`bash
+```bash
 git clone https://github.com/ahmedzeyad67/library-management-system.git
 cd library-management-system
 npm install
-\`\`\`
+```
 
 ### Environment Variables
 
@@ -162,10 +162,10 @@ Create a `.env` file in the project root and configure the required environment 
 
 At minimum, the application requires a MongoDB connection string and supports a configurable server port:
 
-\`\`\`env
+```env
 MONGO_URI=your_mongodb_connection_string
 PORT=3000
-\`\`\`
+```
 
 Also configure the JWT secrets and Cloudinary credentials required by the application's authentication and image-upload configuration.
 
@@ -175,9 +175,9 @@ Also configure the JWT secrets and Cloudinary credentials required by the applic
 
 Start the application:
 
-\`\`\`bash
+```bash
 npm start
-\`\`\`
+```
 
 The server connects to MongoDB, starts the scheduled jobs, and listens for incoming requests. The default port is `3000` when `PORT` is not set.
 
@@ -185,21 +185,21 @@ The server connects to MongoDB, starts the scheduled jobs, and listens for incom
 
 Run the complete test suite:
 
-\`\`\`bash
+```bash
 npm test
-\`\`\`
+```
 
 Run tests in watch mode:
 
-\`\`\`bash
+```bash
 npm run test:watch
-\`\`\`
+```
 
 Generate a test coverage report:
 
-\`\`\`bash
+```bash
 npm run test:coverage
-\`\`\`
+```
 
 The test suite covers API behavior, authentication, authorization, business rules, data consistency, middleware, utilities, and important failure scenarios.
 
