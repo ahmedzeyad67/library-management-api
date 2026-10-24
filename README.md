@@ -169,8 +169,6 @@ PORT=3000
 
 Also configure the JWT secrets and Cloudinary credentials required by the application's authentication and image-upload configuration.
 
-**Never commit your `.env` file or expose secrets in the repository.**
-
 ### Run the Server
 
 Start the application:
