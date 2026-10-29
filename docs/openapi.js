@@ -257,7 +257,7 @@ const openapi = {
     "/auth/register": {
       post: {
         tags: ["Authentication"],
-        summary: "Register a new user",
+        summary: "Register",
         requestBody: jsonBody({
           type: "object",
           required: ["firstName", "lastName", "email", "phone", "password"],
@@ -297,7 +297,7 @@ const openapi = {
     "/auth/logout": {
       post: {
         tags: ["Authentication"],
-        summary: "Log out and revoke a refresh token",
+        summary: "Log out",
         requestBody: jsonBody({
           type: "object",
           required: ["refreshToken"],
@@ -312,7 +312,7 @@ const openapi = {
     "/auth/refresh": {
       post: {
         tags: ["Authentication"],
-        summary: "Refresh access and refresh tokens",
+        summary: "Refresh tokens",
         requestBody: jsonBody({
           type: "object",
           required: ["refreshToken"],
@@ -329,7 +329,7 @@ const openapi = {
       patch: {
         ...protectedOperation,
         tags: ["Authentication"],
-        summary: "Change the current user's password",
+        summary: "Change password",
         requestBody: jsonBody({
           type: "object",
           required: ["currentPassword", "newPassword"],
@@ -345,7 +345,7 @@ const openapi = {
       get: {
         ...protectedOperation,
         tags: ["Authentication"],
-        summary: "Get the current user",
+        summary: "Get me",
         responses: { 200: successResponse("UserSuccess"), ...commonResponses() },
       },
     },
@@ -376,7 +376,7 @@ const openapi = {
       patch: {
         ...protectedOperation,
         tags: ["Users"],
-        summary: "Update the current user's profile",
+        summary: "Update profile",
         requestBody: jsonBody({ $ref: "#/components/schemas/UserUpdate" }),
         responses: { 200: successResponse("UserUpdateSuccess"), ...commonResponses() },
       },
